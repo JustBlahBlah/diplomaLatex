@@ -1,0 +1,88 @@
+% Выбираем класс extarticle для поддержки шрифта 14pt
+\documentclass[14pt, a4paper]{extarticle}
+
+% ================= МОВА ТА ШРИФТИ =================
+\usepackage[utf8]{inputenc}
+\usepackage[T2A]{fontenc}
+\usepackage[ukrainian]{babel}
+
+% Times New Roman для тексту (з правильною кирилицею)
+\usepackage{tempora} 
+% Times New Roman для математичних формул
+\usepackage{newtxmath} 
+
+% ================= ГЕОМЕТРІЯ ТА ПОЛЯ =================
+% Зліва 30мм (для зшивання), інші по стандартам з тексту
+\usepackage[left=3cm, right=1cm, top=2cm, bottom=2cm]{geometry}
+
+% ================= АБЗАЦИ ТА ІНТЕРВАЛИ =================
+\usepackage{setspace}
+\onehalfspacing % Міжрядковий інтервал 1.5
+
+\usepackage{indentfirst} % Відступ для першого абзацу в розділі
+\setlength{\parindent}{1.25cm} % Абзацний відступ рівно 1.25 см
+
+% ================= ОФОРМЛЕННЯ ЗАГОЛОВКІВ =================
+\usepackage{titlesec}
+
+% Розділ 1 (РОЗДІЛ 1, з нового рядка НАЗВА ВЕЛИКИМИ ЛІТЕРАМИ, по центру)
+\titleformat{\section}[display]
+{\filcenter\bfseries} % По центру, напівжирний
+{\MakeUppercase{Розділ \thesection}} % Слово РОЗДІЛ X
+{0pt} % Відстань між словом РОЗДІЛ і назвою
+{\MakeUppercase} % Назва великими літерами
+
+% Щоб кожен розділ починався з нової сторінки
+\newcommand{\sectionbreak}{\clearpage}
+
+% Відстань від назви розділу до тексту (2 рядки)
+\titlespacing*{\section}{0pt}{*0}{2\baselineskip}
+
+% Підрозділ 1.1 (З абзацу, напівжирний, без крапки в кінці)
+\titleformat{\subsection}[block]
+{\bfseries}
+{\hspace{1.25cm}\thesubsection} % Відступ номера як абзац
+{1ex}
+{}
+
+% Відстань для підрозділів (1 рядок до і після)
+\titlespacing*{\subsection}{0pt}{\baselineskip}{\baselineskip}
+
+% Пункт 1.1.1 (Звичайний шрифт, з абзацу)
+\titleformat{\subsubsection}[block]
+{\normalfont}
+{\hspace{1.25cm}\thesubsubsection}
+{1ex}
+{}
+
+\titlespacing*{\subsubsection}{0pt}{\baselineskip}{\baselineskip}
+
+% ================= ФОРМУЛИ ТА РИСУНКИ =================
+\usepackage{amsmath}
+
+% Відступи до і після формул (12 пт)
+\setlength{\abovedisplayskip}{12pt}
+\setlength{\belowdisplayskip}{12pt}
+\setlength{\abovedisplayshortskip}{12pt}
+\setlength{\belowdisplayshortskip}{12pt}
+
+% Для рисунків (відступ 12 пт)
+\usepackage{caption}
+\captionsetup{aboveskip=12pt, belowskip=12pt}
+\setlength{\intextsep}{12pt} % Відстань від тексту до рисунка
+
+% ================= НУМЕРАЦІЯ СТОРІНОК =================
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{} % Очищаємо всі колонтитули
+\fancyfoot[R]{\thepage} % Номер сторінки знизу справа
+\renewcommand{\headrulewidth}{0pt} % Прибираємо лінію зверху
+\renewcommand{\footrulewidth}{0pt} % Прибираємо лінію знизу
+
+% ================= ІНШІ ПАКЕТИ =================
+\usepackage{graphicx}
+\usepackage{float}
+\usepackage{xurl}
+\usepackage{csquotes} % Для правильних лапок (працює з babel)
+
+\sloppy % Дозволяє розтягувати пробіли, щоб текст не вилазив за поля

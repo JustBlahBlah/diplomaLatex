@@ -1,0 +1,82 @@
+\subsection{Поширення другої барицентричної формули на двовимірний випадок}
+У класичній обчислювальній математиці друга барицентрична формула добре досліджена та широко застосовується переважно для одновимірних функцій. Проте растрові цифрові зображення являють собою двовимірні матриці піксельних значень. Відповідно, для їх коректного та точного геометричного перетворення базовий одновимірний апарат не може бути застосований безпосередньо — його необхідно математично розширити та адаптувати для роботи на двовимірній просторовій сітці.
+
+Головна перевага використання екстремумів поліномів Чебишева в цьому контексті полягає в обчислювальній ефективності: аналітичний вигляд вагових коефіцієнтів дозволяє уникнути складних матричних операцій навіть при узагальненні формули на вищі розмірності. Це кардинально знижує обчислювальне навантаження, перетворюючи теоретично складний метод на швидкий та стабільний інструмент для обробки зображень.
+
+Відтак, подальша побудова математичної моделі алгоритму ґрунтується на послідовному узагальненні розглянутого барицентричного апарату на двовимірний простір, що забезпечує високу точність та числову стійкість при зміні масштабу растрових даних.
+\begin{equation}
+	l_x(x) = \prod_{k=0}^{n}(x-x_k), \quad l_y(y) = \prod_{k=0}^{m}(y-y_k) \tag{1}
+\end{equation}
+
+\begin{equation}
+	L_{n,m}(x,y) = \sum_{i=0}^{n} \sum_{j=0}^{m} \frac{l_x(x)l_y(y)}{(x-x_i)(y-y_j)} \lambda_i^{(n)} \lambda_j^{(m)} f_{ij} \tag{2}
+\end{equation}
+
+\begin{equation}
+	\lambda_i^{(n)} = \frac{1}{\prod_{k=0, k \ne i}^{n}(x_i-x_k)}, \quad \lambda_j^{(m)} = \frac{1}{\prod_{p=0, p \ne j}^{m}(y_j-y_p)} \tag{3}
+\end{equation}
+
+\begin{equation}
+	\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{l_x(x)l_y(y)}{(x-x_i)(y-y_j)} \lambda_i^{(n)} \lambda_j^{(m)} = 1 \tag{4}
+\end{equation}
+
+\begin{equation}
+	L_{n,m}(x,y) = \frac{\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)} f_{ij}}{\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)}} \tag{5}
+\end{equation}
+
+Якщо $x_r \neq x_i \quad \forall i=\overline{0,n}, \quad y_r \neq y_j, \quad \forall j=\overline{0,m}$
+\begin{equation*}
+	L_{n,m}(x_z, y_z) = \frac{\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)} f_{ij}}{\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)}} \tag{6}
+\end{equation*}
+
+Якщо $x_r = x_i, y_r = y_j, i = \overline{0,n}, j = \overline{0,m}$:
+\begin{equation}
+	L_{n,m}(x_i, y_j) = f_{ij} \tag{7}
+\end{equation}
+
+Якщо $x_z \neq x_i \quad \forall i=\overline{0,n}, \quad y_z \neq y_j, \quad \forall j=\overline{0,m}$
+\begin{equation*}
+	L_{n,m}(x_z, y_z) = \frac{\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)} f_{ij}}{\sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)}}
+\end{equation*}
+
+Якщо $x_r = x_{i^*}, \quad x_{i^*} \in w_x$, то
+\begin{equation*}
+	\frac{l_{x,n}(x_{i^*})}{(x_{i^*} - x_i)} \lambda_i^{(n)} = \delta_{i^* i} = \begin{cases} 1, & i^*=i \\ 0, & i^* \neq i \end{cases} .
+\end{equation*}
+
+Тому з (5) отримаємо
+\begin{align}
+	L_{n,m}(x_{i^*}, y_z) &= \frac{\sum_{j=0}^{m} \frac{l_{y,m}(y_z)}{(y_z - y_j)} \lambda_j^{(m)} f_{i^* j}}{\sum_{j=0}^{m} \frac{l_{y,m}(y_z)}{(y_z - y_j)} \lambda_j^{(m)}} = \nonumber \\
+	&= \frac{\sum_{j=0}^{m} \frac{\lambda_j^{(m)}}{(y_z - y_j)} f_{i^* j}}{\sum_{j=0}^{m} \frac{\lambda_j^{(m)}}{(y_z - y_j)}} \tag{8}
+\end{align}
+
+Аналогічно, якщо
+$y_r = y_{j^*}, \quad y_{j^*} \in \omega_y$, то
+\begin{equation}
+	L_{n,m}(x_z, y_{j^*}) = \frac{\sum_{i=0}^{n} \frac{\lambda_i^{(n)}}{(x_z - x_i)} f_{i j^*}}{\sum_{i=0}^{n} \frac{\lambda_i^{(n)}}{(x_z - x_i)}} \tag{9}
+\end{equation}
+
+Вузли Чебишева:
+\begin{equation}
+	\omega_x = \{x_i = -\cos \frac{\pi i}{n}, i = \overline{0,n}\}, \quad \omega_y = \{y_j = -\cos \frac{\pi j}{m}, j = \overline{0,m}\} \tag{10}
+\end{equation}
+
+Якщо $x_r \ne x_i$ та $y_r \ne y_j$:
+\begin{equation}
+	L_{n,m}(x_z, y_z) = \frac{\sideset{}{'}\sum_{i=0}^{n} \sideset{}{'}\sum_{j=0}^{m} \frac{(-1)^{i+j}}{(x_z-x_i)(y_z-y_j)} f_{ij}}{\sideset{}{'}\sum_{i=0}^{n} \sideset{}{'}\sum_{j=0}^{m} \frac{(-1)^{i+j}}{(x_z-x_i)(y_z-y_j)}} \tag{13}
+\end{equation}
+
+Якщо $x_r = x_{i^*}, x_{i^*} \in \omega_x, y_r \ne y_j, y_j \in \omega_y$:
+\begin{equation}
+	L_{n,m}(x_{i^*}, y_z) = \frac{\sideset{}{'}\sum_{j=0}^{m} \frac{(-1)^j}{y_z-y_j} f_{i^* j}}{\sideset{}{'}\sum_{j=0}^{m} \frac{(-1)^j}{y_z-y_j}} \tag{14}
+\end{equation}
+
+Якщо $y_r = y_{j^*}, y_{j^*} \in \omega_y, x_r \ne x_i, x_i \in \omega_x$:
+\begin{equation}
+	L_{n,m}(x_z, y_{j^*}) = \frac{\sideset{}{'}\sum_{i=0}^{n} \frac{(-1)^i}{x_z-x_i} f_{i j^*}}{\sideset{}{'}\sum_{i=0}^{n} \frac{(-1)^i}{x_z-x_i}} \tag{15}
+\end{equation}
+
+Символ $\sum'$ означає:
+\begin{equation*}
+	\sideset{}{'}\sum_{p=0}^{N} a_p = \frac{1}{2} a_0 + \sum_{p=1}^{N-1} a_p + \frac{1}{2} a_N
+\end{equation*}
