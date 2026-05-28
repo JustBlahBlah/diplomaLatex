@@ -8,8 +8,6 @@
 
 % Times New Roman для тексту (з правильною кирилицею)
 \usepackage{tempora} 
-% Times New Roman для математичних формул
-\usepackage{newtxmath} 
 
 % ================= ГЕОМЕТРІЯ ТА ПОЛЯ =================
 % Зліва 30мм (для зшивання), інші по стандартам з тексту
@@ -59,7 +57,13 @@
 
 % ================= ФОРМУЛИ ТА РИСУНКИ =================
 \usepackage{amsmath}
-
+\usepackage{amsthm}
+% Times New Roman для математичних формул
+\usepackage{newtxmath} 
+\newtheorem{statement}{Твердження}
+\newtheorem{theorem}{Теорема}
+\theoremstyle{definition} 
+\newtheorem{remark}{Зауваження}
 % Відступи до і після формул (12 пт)
 \setlength{\abovedisplayskip}{12pt}
 \setlength{\belowdisplayskip}{12pt}
