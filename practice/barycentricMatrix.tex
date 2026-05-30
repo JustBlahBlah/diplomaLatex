@@ -1,30 +1,135 @@
-\subsubsection{Матрична форма алгоритму: перехід до операцій лінійної алгебри}
+\subsubsection{Матрична форма двовимірної барицентричної інтерполяції}
 
-Подальшим розвитком архітектури стало подання двовимірної барицентричної інтерполяції у вигляді операцій лінійної алгебри. Такий підхід дозволяє відмовитися від управління вкладеними циклами на рівні обробки пікселів і перейти до високорівневих матричних обчислень, які є значно дружнішими до кеш-пам'яті сучасних процесорів (cache-friendly) та відкривають шлях до SIMD-векторизації.
+У цьому підрозділі безпосередньо з двовимірної барицентричної формули~\eqref{eq:barycentric_2d_general} виводиться її матричне представлення, яке зводить задачу масштабування зображення до двох послідовних множень матриць.
 
-Розглянемо вихідне зображення як набір з трьох незалежних матриць $F^{(R)}$, $F^{(G)}$, $F^{(B)}$ розмірністю $H \times W$, кожна з яких містить значення відповідного колірного каналу. Цільове зображення також складатиметься з трьох матриць $C^{(R)}$, $C^{(G)}$, $C^{(B)}$ розмірністю $H_2 \times W_2$.
-
-Оскільки в барицентричній формулі операції додавання та множення є лінійними, а знаменник можна факторизувати, ми можемо перенести операцію ділення (нормалізації) на етап попереднього розрахунку ваг. Сформуємо матрицю вагових коефіцієнтів для осі ординат $W_y$ розмірністю $H_2 \times H$. Кожен елемент цієї матриці $w^{(y)}_{Y, j}$ нормалізується сумою всього рядка:
-\begin{equation}\label{eq:matrix_Wy}
-	w^{(y)}_{Y, j} = \frac{\frac{(-1)^j}{y_Y - y_j}}{\sum_{k=0}^{m} \vphantom{\sum}^{\prime} \frac{(-1)^k}{y_Y - y_k}}, \quad \text{де } Y \in [0, H_2-1], \; j \in [0, H-1].
+\paragraph{Крок~1. Факторизація ядра.}
+Розглянемо базову формулу для довільної цільової точки $(x, y)$:
+\begin{equation}\label{eq:m_original}
+	L_{n,m}(x, y) = \frac{
+		\sideset{}{'}\sum\limits_{i=0}^{n}
+		\sideset{}{'}\sum\limits_{j=0}^{m}
+		\dfrac{(-1)^{i+j}}{(x - x_i)(y - y_j)}\, f_{i,j}
+	}{
+		\sideset{}{'}\sum\limits_{i=0}^{n}
+		\sideset{}{'}\sum\limits_{j=0}^{m}
+		\dfrac{(-1)^{i+j}}{(x - x_i)(y - y_j)}
+	}.
 \end{equation}
 
-Аналогічним чином формується нормалізована матриця ваг для осі абсцис $W_x$ розмірністю $W_2 \times W$, елементи якої залежать від координат $x_X$ та $x_i$. У випадку точного збігу цільової координати з вузлом вихідної сітки (ситуація, що призводить до ділення на нуль), відповідний рядок матриці заповнюється нулями, а в позицію збігу записується одиниця. Це гарантує точне перенесення кольору вихідного пікселя без додаткових обчислень.
-
-Після побудови нормалізованих матриць ваг, обчислення фінального зображення для кожного колірного каналу зводиться до подвійного матричного множення:
-\begin{equation}\label{eq:matrix_multiplication}
-	C^{(c)} = W_y \times F^{(c)} \times W_x^T, \quad \text{де } c \in \{R, G, B\},
+Введемо ненормалізовані вагові коефіцієнти, розділивши ядро на множники, що залежать лише від однієї змінної. Скористаємося тотожностями $(-1)^{i+j} = (-1)^i \cdot (-1)^j$ та $\frac{1}{(x-x_i)(y-y_j)} = \frac{1}{x-x_i} \cdot \frac{1}{y-y_j}$:
+\begin{equation}\label{eq:m_uv}
+	u_i(x) \stackrel{\text{def}}{=} \frac{w_i}{x - x_i}, \qquad
+	v_j(y) \stackrel{\text{def}}{=} \frac{w_j}{y - y_j},
 \end{equation}
-де $W_x^T$ — транспонована матриця ваг осі абсцис розмірністю $W \times W_2$.
+де $w_k = (-1)^k$ з половинними значеннями на краях: $w_0 = \tfrac{1}{2}$, $w_n = \tfrac{(-1)^n}{2}$ (аналогічно для осі~$y$). Позначимо чисельник і знаменник формули~\eqref{eq:m_original} як $N$ та $D$ відповідно. Тоді:
+\begin{equation}\label{eq:m_ND}
+	N = \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{m} u_i(x)\, v_j(y)\, f_{i,j}, \qquad
+	D = \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{m} u_i(x)\, v_j(y).
+\end{equation}
 
-У програмній реалізації (\texttt{processMatrixBarycentricZoom}) цей математичний апарат імплементовано за допомогою стандартних контейнерів \texttt{std::vector}, які забезпечують неперервне зберігання даних у пам'яті (contiguous memory layout). Вихідне зображення \texttt{QImage} розкладається на три плоскі масиви \texttt{float}, після чого виконується ручне матричне множення. 
+\paragraph{Крок~2. Факторизація знаменника.}
+Оскільки знаменник не містить множника $f_{i,j}$, що зв'язує індекси, подвійна сума розпадається у добуток двох одинарних:
+\begin{equation}\label{eq:m_D_factor}
+	D = \left(\sum\limits_{i=0}^{n} u_i(x)\right) \cdot \left(\sum\limits_{j=0}^{m} v_j(y)\right)
+	\stackrel{\text{def}}{=} S_u(x) \cdot S_v(y).
+\end{equation}
 
-Процес обчислення виразу \eqref{eq:matrix_multiplication} розділено на два етапи для збереження оптимальної обчислювальної складності $\mathcal{O}(H_2 \cdot W \cdot (H + W_2))$:
+\paragraph{Крок~3. Розподіл ділення.}
+Перегрупуємо чисельник, винісши за внутрішню суму множники, що не залежать від~$j$:
+\begin{equation}\label{eq:m_N_regroup}
+	N = \sum\limits_{i=0}^{n} u_i(x) \cdot \left[\sum\limits_{j=0}^{m} v_j(y)\, f_{i,j}\right].
+\end{equation}
+Підставимо у вираз $L = N/D$:
+\begin{equation}\label{eq:m_L_step}
+	L = \frac{
+		\sum\limits_{i=0}^{n} u_i(x) \cdot
+		\left[\sum\limits_{j=0}^{m} v_j(y)\, f_{i,j}\right]
+	}{S_u(x) \cdot S_v(y)}.
+\end{equation}
+Оскільки $S_v(y)$ не залежить від індексу~$i$, а $S_u(x)$ не залежить від індексу~$j$, можна розподілити ділення між обома сумами:
+\begin{equation}\label{eq:m_L_distributed}
+	L = \sum\limits_{i=0}^{n} \frac{u_i(x)}{S_u(x)} \cdot \sum\limits_{j=0}^{m} \frac{v_j(y)}{S_v(y)}\, f_{i,j}.
+\end{equation}
+
+\paragraph{Крок~4. Нормалізовані барицентричні коефіцієнти.}
+Визначимо нормалізовані коефіцієнти:
+\begin{equation}\label{eq:m_alpha_beta}
+	\alpha_i(x) \stackrel{\text{def}}{=} \frac{u_i(x)}{S_u(x)} = \frac{\dfrac{w_i}{x - x_i}}{\sum\limits_{k=0}^{n} \dfrac{w_k}{x - x_k}}, \qquad
+	\beta_j(y) \stackrel{\text{def}}{=} \frac{v_j(y)}{S_v(y)} = \frac{\dfrac{w_j}{y - y_j}}{\sum\limits_{k=0}^{m} \dfrac{w_k}{y - y_k}}.
+\end{equation}
+Безпосередньо з визначення випливає властивість нормалізації:
+\begin{equation}\label{eq:m_norm_proof}
+	\sum\limits_{i=0}^{n} \alpha_i(x) = \sum\limits_{i=0}^{n} \frac{u_i}{S_u} = \frac{1}{S_u} \sum\limits_{i=0}^{n} u_i = \frac{S_u}{S_u} = 1.
+\end{equation}
+Аналогічно $\sum_{j=0}^{m} \beta_j(y) = 1$. Іншими словами, $\alpha_i(x)$~--- це частка внеску $i$-го вузла у загальну суму ваг, і всі частки разом складають одиницю. У програмному коді нормалізація реалізується діленням кожного вагового коефіцієнта на їхню суму. Якщо $x$ збігається з вузлом $x_{i^*}$, покладаємо $\alpha_{i^*} = 1$, $\alpha_i = 0$ при $i \neq i^*$ (аналогічно для $\beta_j$).
+
+\paragraph{Крок~5. Фінальна формула.}
+Підставляючи~\eqref{eq:m_alpha_beta} у~\eqref{eq:m_L_distributed}, отримуємо:
+\begin{equation}\label{eq:m_bilinear}
+	\boxed{ L_{n,m}(x, y) = \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{m} \alpha_i(x)\,\beta_j(y)\, f_{i,j}. }
+\end{equation}
+Двовимірна барицентрична інтерполяція зведена до зваженого середнього значень $f_{i,j}$, де вага кожного пікселя є добутком двох одновимірних нормалізованих коефіцієнтів.
+
+\paragraph{Крок~6. Матрична інтерпретація для однієї точки.}
+Позначимо:
+\begin{itemize}
+	\item $\boldsymbol{\alpha}(x) = [\alpha_0(x),\; \alpha_1(x),\; \ldots,\; \alpha_n(x)]^{\!\top}$~--- вектор-стовпець розмірності $W$;
+	\item $\boldsymbol{\beta}(y) = [\beta_0(y),\; \beta_1(y),\; \ldots,\; \beta_m(y)]^{\!\top}$~--- вектор-стовпець розмірності $H$;
+	\item $\mathbf{F} \in \mathbb{R}^{H \times W}$~--- матриця кольорових значень вихідного зображення, $\mathbf{F}_{j,i} = f_{i,j}$.
+\end{itemize}
+Тоді формула~\eqref{eq:m_bilinear} записується як білінійна форма:
+\begin{equation}\label{eq:m_bilinear_vec}
+	L_{n,m}(x, y) = \boldsymbol{\beta}(y)^{\!\top}\,\mathbf{F}\, \boldsymbol{\alpha}(x),
+\end{equation}
+що обчислюється у два кроки:
 \begin{enumerate}
-	\item \textbf{Проміжне множення:} Обчислюється матриця $T = W_y \times F^{(c)}$ розмірністю $H_2 \times W$.
-	\item \textbf{Фінальне множення:} Сформована матриця $T$ множиться на транспоновану матрицю ваг $C^{(c)} = T \times W_x^T$.
+	\item \textit{Інтерполяція вздовж $y$} (множення матриці на вектор):
+	\begin{equation}\label{eq:m_pass1_vec}
+		\mathbf{r}(y) = \mathbf{F}^{\!\top} \boldsymbol{\beta}(y) \in \mathbb{R}^{W}, \qquad
+		r_i = \sum\limits_{j=0}^{m} \beta_j(y)\, f_{i,j}.
+	\end{equation}
+	\item \textit{Інтерполяція вздовж $x$} (скалярний добуток):
+	\begin{equation}\label{eq:m_pass2_vec}
+		L_{n,m}(x, y) = \boldsymbol{\alpha}(x)^{\!\top}\, \mathbf{r}(y) = \sum\limits_{i=0}^{n} \alpha_i(x)\, r_i.
+	\end{equation}
 \end{enumerate}
 
-Для забезпечення високої швидкодії обидва етапи матричного множення паралелізуються за допомогою пулу потоків (\texttt{std::thread}). Кожен потік відповідає за обчислення окремого блоку рядків результуючої матриці. Використання одновимірних масивів замість двовимірних структур дозволило алгоритму ефективно використовувати лінії кешу процесора (cache lines). Процесор завантажує дані блоками послідовно, мінімізуючи кількість промахів кешу (cache misses) під час послідовного читання рядків матриць $W_y$ та $F^{(c)}$. 
+\paragraph{Крок~7. Узагальнення на всі цільові точки.}
+Для цільового зображення розміром $W_2 \times H_2$ побудуємо дві \textit{вагові матриці}, рядки яких є нормалізованими барицентричними коефіцієнтами для кожного цільового пікселя:
+\begin{equation}\label{eq:m_matrix_A}
+	\mathbf{A} \in \mathbb{R}^{W_2 \times W}, \qquad \mathbf{A}_{p,i} = \alpha_i(x_p), \qquad p = 0, \ldots, W_2 - 1,
+\end{equation}
+\begin{equation}\label{eq:m_matrix_B}
+	\mathbf{B} \in \mathbb{R}^{H_2 \times H}, \qquad \mathbf{B}_{q,j} = \beta_j(y_q), \qquad q = 0, \ldots, H_2 - 1,
+\end{equation}
+де $x_p = -\cos(\pi p / (W_2 - 1))$ та $y_q = -\cos(\pi q / (H_2 - 1))$. Кожен рядок обох матриць задовольняє умову нормалізації: сума елементів рядка дорівнює~$1$.
 
-Такий підхід не лише спростив логіку внутрішніх циклів, прибравши з них умовні переходи (\texttt{if-else}) для обробки збігу координат, але й підготував архітектурну базу для подальшої апаратної оптимізації за допомогою спеціалізованих математичних бібліотек.
+Елемент результуючої матриці $\mathbf{G}_{q,p} = L_{n,m}(x_p, y_q)$ відповідно до~\eqref{eq:m_bilinear} розраховується як:
+\begin{equation*}
+	\mathbf{G}_{q,p} = \sum\limits_{i=0}^{n}\sum\limits_{j=0}^{m} \mathbf{A}_{p,i}\, \mathbf{B}_{q,j}\, \mathbf{F}_{j,i}
+	= \sum\limits_{i=0}^{n} \mathbf{A}_{p,i} \underbrace{\sum\limits_{j=0}^{m} \mathbf{B}_{q,j}\, \mathbf{F}_{j,i}} _{(\mathbf{B}\,\mathbf{F})_{q,i}}.
+\end{equation*}
+Внутрішня сума є елементом добутку матриць $\mathbf{B} \cdot \mathbf{F}$, а зовнішня~--- добутку з $\mathbf{A}^{\!\top}$. Отже, фінальне матричне рівняння має вигляд:
+\begin{equation}\label{eq:m_result}
+	\boxed{ \mathbf{G} = \mathbf{B}\, \mathbf{F}\, \mathbf{A}^{\!\top}. }
+\end{equation}
+
+\paragraph{Двопрохідне обчислення.}
+Формула~\eqref{eq:m_result} обчислюється у два етапи з виділенням проміжної матриці:
+\begin{enumerate}
+	\item \textbf{Перший прохід} (інтерполяція вздовж~$y$):
+	\begin{equation}\label{eq:m_pass1}
+		\mathbf{T} = \mathbf{B}\, \mathbf{F}, \qquad \mathbf{T} \in \mathbb{R}^{H_2 \times W}, \qquad \mathbf{T}_{q,i} = \sum\limits_{j=0}^{m} \beta_j(y_q)\, f_{i,j}.
+	\end{equation}
+	\item \textbf{Другий прохід} (інтерполяція вздовж~$x$):
+	\begin{equation}\label{eq:m_pass2}
+		\mathbf{G} = \mathbf{T}\, \mathbf{A}^{\!\top}, \qquad \mathbf{G} \in \mathbb{R}^{H_2 \times W_2}, \qquad \mathbf{G}_{q,p} = \sum\limits_{i=0}^{n} \alpha_i(x_p)\, \mathbf{T}_{q,i}.
+	\end{equation}
+\end{enumerate}
+
+\paragraph{Обчислювальна складність.}
+Побудова вагових матриць потребує $\mathcal{O}(W_2 \cdot W)$ операцій для $\mathbf{A}$ та $\mathcal{O}(H_2 \cdot H)$ для $\mathbf{B}$. Матричне множення $\mathbf{B} \cdot \mathbf{F}$ виконується за $\mathcal{O}(H_2 \cdot W \cdot H)$ операцій, а множення $\mathbf{T} \cdot \mathbf{A}^{\!\top}$~--- за $\mathcal{O}(H_2 \cdot W_2 \cdot W)$. Загальна асимптотична складність алгоритму становить:
+\begin{equation}
+	\mathcal{O}\bigl(W \cdot H_2 \cdot (H + W_2)\bigr).
+\end{equation}
+Така матрична форма дозволяє використовувати апаратно оптимізовані бібліотеки лінійної алгебри для додаткового прискорення за рахунок ефективного використання кеш-пам'яті процесора.
