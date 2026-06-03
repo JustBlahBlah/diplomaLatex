@@ -1,0 +1,84 @@
+\subsection{Поширення другої барицентричної формули на двовимірний випадок}
+
+У класичній обчислювальній математиці друга барицентрична формула добре досліджена та широко застосовується переважно для одновимірних функцій. Проте растрові цифрові зображення являють собою двовимірні матриці піксельних значень. Відповідно, для їх коректного та точного геометричного перетворення базовий одновимірний апарат не може бути застосований безпосередньо — його необхідно математично розширити та адаптувати для роботи на двовимірній просторовій сітці.
+
+Головна перевага використання екстремумів поліномів Чебишева в цьому контексті полягає в обчислювальній ефективності: аналітичний вигляд вагових коефіцієнтів дозволяє уникнути складних матричних операцій навіть при узагальненні формули на вищі розмірності. Це кардинально знижує обчислювальне навантаження, перетворюючи теоретично складний метод на швидкий та стабільний інструмент для обробки зображень.
+
+Відтак, подальша побудова математичної моделі алгоритму ґрунтується на послідовному узагальненні розглянутого барицентричного апарату на двовимірний простір, що забезпечує високу точність та числову стійкість при зміні масштабу растрових даних.
+
+Введемо двовимірні вузлові поліноми:
+\begin{equation}\label{eq:nodal_polynomials_2d}
+	l_x(x) = \prod\limits_{k=0}^{n}(x-x_k), \quad l_y(y) = \prod\limits_{k=0}^{m}(y-y_k).
+\end{equation}
+
+Двовимірна інтерполяційна формула Лагранжа набуває вигляду:
+\begin{equation}\label{eq:lagrange_2d}
+	L_{n,m}(x,y) = \sum\limits_{i=0}^{n} \sum\limits_{j=0}^{m} \frac{l_x(x)l_y(y)}{(x-x_i)(y-y_j)} \lambda_i^{(n)} \lambda_j^{(m)} f_{ij},
+\end{equation}
+де вагові коефіцієнти для обох осей визначаються як:
+\begin{equation}\label{eq:weights_2d}
+	\lambda_i^{(n)} = \frac{1}{\prod\limits_{\substack{k=0 \\ k \ne i}}^{n}(x_i-x_k)}, \quad \lambda_j^{(m)} = \frac{1}{\prod\limits_{\substack{p=0 \\ p \ne j}}^{m}(y_j-y_p)}.
+\end{equation}
+
+Використовуючи тотожність для суми базисних поліномів:
+\begin{equation}\label{eq:sum_weights_2d}
+	\sum\limits_{i=0}^{n} \sum\limits_{j=0}^{m} \frac{l_x(x)l_y(y)}{(x-x_i)(y-y_j)} \lambda_i^{(n)} \lambda_j^{(m)} = 1,
+\end{equation}
+можемо розділити~\eqref{eq:lagrange_2d} на~\eqref{eq:sum_weights_2d}. Після скорочення спільних множників $l_x(x)l_y(y)$ отримуємо загальну другу двовимірну барицентричну формулу:
+\begin{equation}\label{eq:barycentric_2d_general}
+	L_{n,m}(x,y) = \frac{\sum\limits_{i=0}^{n} \sum\limits_{j=0}^{m} \dfrac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)} f_{ij}}{\sum\limits_{i=0}^{n} \sum\limits_{j=0}^{m} \dfrac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x-x_i)(y-y_j)}}.
+\end{equation}
+
+Залежно від положення цільової точки оцінки $(x_z, y_z)$ відносно вузлів сітки, обчислення розгалужуються на кілька випадків.
+
+Якщо точка не збігається з жодним із вузлів ($x_z \neq x_i \quad \forall i=\overline{0,n}, \quad y_z \neq y_j \quad \forall j=\overline{0,m}$):
+\begin{equation}\label{eq:barycentric_2d_xz_yz}
+	L_{n,m}(x_z, y_z) = \frac{\sum\limits_{i=0}^{n} \sum\limits_{j=0}^{m} \dfrac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x_z-x_i)(y_z-y_j)} f_{ij}}{\sum\limits_{i=0}^{n} \sum\limits_{j=0}^{m} \dfrac{\lambda_i^{(n)} \lambda_j^{(m)}}{(x_z-x_i)(y_z-y_j)}}.
+\end{equation}
+
+Якщо точка точно збігається з вузлом сітки ($x_z = x_i, y_z = y_j$):
+\begin{equation}\label{eq:barycentric_2d_exact}
+	L_{n,m}(x_i, y_j) = f_{ij}.
+\end{equation}
+
+Якщо відбувається збіг лише по осі $X$ ($x_z = x_{i^*}, \quad x_{i^*} \in \omega_x$), то за властивістю вузлового полінома:
+\begin{equation*}
+	\frac{l_{x,n}(x_{i^*})}{(x_{i^*} - x_i)} \lambda_i^{(n)} = \delta_{i^* i} = \begin{cases} 1, & i^*=i \\ 0, & i^* \neq i \end{cases} .
+\end{equation*}
+Тому з рівняння~\eqref{eq:barycentric_2d_general} отримуємо спрощення до одновимірної форми:
+\begin{align}\label{eq:barycentric_2d_x_exact}
+	L_{n,m}(x_{i^*}, y_z) &= \frac{\sum\limits_{j=0}^{m} \dfrac{l_{y,m}(y_z)}{(y_z - y_j)} \lambda_j^{(m)} f_{i^* j}}{\sum\limits_{j=0}^{m} \dfrac{l_{y,m}(y_z)}{(y_z - y_j)} \lambda_j^{(m)}} = \nonumber \\
+	&= \frac{\sum\limits_{j=0}^{m} \dfrac{\lambda_j^{(m)}}{(y_z - y_j)} f_{i^* j}}{\sum\limits_{j=0}^{m} \dfrac{\lambda_j^{(m)}}{(y_z - y_j)}}.
+\end{align}
+
+Аналогічно, якщо збіг відбувається лише по осі $Y$ ($y_z = y_{j^*}, \quad y_{j^*} \in \omega_y$), формула набуває вигляду:
+\begin{equation}\label{eq:barycentric_2d_y_exact}
+	L_{n,m}(x_z, y_{j^*}) = \frac{\sum\limits_{i=0}^{n} \dfrac{\lambda_i^{(n)}}{(x_z - x_i)} f_{i j^*}}{\sum\limits_{i=0}^{n} \dfrac{\lambda_i^{(n)}}{(x_z - x_i)}}.
+\end{equation}
+
+Для конкретного випадку застосування вузлів Чебишева, просторова сітка задається як:
+\begin{equation}\label{eq:cheb_nodes_2d}
+	\omega_x = \left\{x_i = -\cos \frac{\pi i}{n}, i = \overline{0,n}\right\}, \quad \omega_y = \left\{y_j = -\cos \frac{\pi j}{m}, j = \overline{0,m}\right\}.
+\end{equation}
+
+З урахуванням аналітичних значень вагових коефіцієнтів Чебишева, підстановка їх у базові рівняння дає наступні обчислювальні форми.
+
+Для загального випадку ($x_z \ne x_i$ та $y_z \ne y_j$):
+\begin{equation}\label{eq:cheb_bary_2d_general}
+	L_{n,m}(x_z, y_z) = \frac{\sideset{}{'}\sum\limits_{i=0}^{n} \sideset{}{'}\sum\limits_{j=0}^{m} \dfrac{(-1)^{i+j}}{(x_z-x_i)(y_z-y_j)} f_{ij}}{\sideset{}{'}\sum\limits_{i=0}^{n} \sideset{}{'}\sum\limits_{j=0}^{m} \dfrac{(-1)^{i+j}}{(x_z-x_i)(y_z-y_j)}}.
+\end{equation}
+
+Для збігу по осі $X$ ($x_z = x_{i^*}, y_z \ne y_j$):
+\begin{equation}\label{eq:cheb_bary_2d_x_exact}
+	L_{n,m}(x_{i^*}, y_z) = \frac{\sideset{}{'}\sum\limits_{j=0}^{m} \dfrac{(-1)^j}{y_z-y_j} f_{i^* j}}{\sideset{}{'}\sum\limits_{j=0}^{m} \dfrac{(-1)^j}{y_z-y_j}}.
+\end{equation}
+
+Для збігу по осі $Y$ ($y_z = y_{j^*}, x_z \ne x_i$):
+\begin{equation}\label{eq:cheb_bary_2d_y_exact}
+	L_{n,m}(x_z, y_{j^*}) = \frac{\sideset{}{'}\sum\limits_{i=0}^{n} \dfrac{(-1)^i}{x_z-x_i} f_{i j^*}}{\sideset{}{'}\sum\limits_{i=0}^{n} \dfrac{(-1)^i}{x_z-x_i}}.
+\end{equation}
+
+Тут символ $\sum'$ традиційно означає, що перший та останній елементи суми беруться з ваговим коефіцієнтом $\frac{1}{2}$:
+\begin{equation*}
+	\sideset{}{'}\sum\limits_{p=0}^{N} a_p = \frac{1}{2} a_0 + \sum\limits_{p=1}^{N-1} a_p + \frac{1}{2} a_N.
+\end{equation*}
