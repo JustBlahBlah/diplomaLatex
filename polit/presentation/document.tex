@@ -1,4 +1,5 @@
 \documentclass[11pt, aspectratio=169]{beamer}
+
 % Підтримка української мови та кирилиці
 \usepackage[T2A]{fontenc}
 \usepackage[utf8]{inputenc}
@@ -38,6 +39,16 @@
 		\end{itemize}
 	\end{frame}
 	
+	\begin{frame}{постановка задачі}
+		\begin{enumerate}
+			\item Ознайомитися з існіючими методами масштабування зображень.
+			\item  Адаптувати математичку модель цифрового зображення на нерівномірних сітках для випадку вузлів Чебишева другого роду.
+			\item Поширити другу барицентричну формулу на двовимірний випадок.
+			\item Розробити програмне забезпечення для масштабування зображень використовуючи новий запропонований та стандартні реалізовані методи.
+			\item Провести тестування та порівняльний аналіз результатів роботи розробленого алгоритму з класичними методами масштабування зображень.
+		\end{enumerate}
+	\end{frame}
+	
 	\begin{frame}{Класифікація візуальних артефактів масштабування}
 		\begin{itemize}
 			\item \textbf{Ефект дзвону (Ringing)} – поява одиночної паразитної хвилі поблизу різких меж зображення.
@@ -48,46 +59,67 @@
 		\end{itemize}
 		\vspace{0.3cm}
 	\end{frame}
-	
-	\begin{frame}{постановка задачі}
-		content...
-	\end{frame}
-	\begin{frame}{порівняння равномерной и чебишевской сетки}
-		content...
-	\end{frame}
-	\begin{frame}{Оптимізований}
-		content...
-	\end{frame}
-	\begin{frame}{Матричний}
-		content...
-	\end{frame}
-	\begin{frame}{OpenCV}
-		content...
-	\end{frame}
-	\begin{frame}{Локальний}
-		content...
-	\end{frame}
-	\begin{frame}{Базові методи OpenCV}
-		content...
-	\end{frame}
-\begin{frame}{Вузли Чебишева: визначення та властивості}
-	Точки на $[-1,1]$, що є екстремумами поліномів Чебишева другого роду $T_n(x)=\cos(n\arccos x)$.
-	
-	\vspace{0.2cm}
-	
-	\textbf{Вузли другого роду (Чебишева-Лобатто):}
-	\[
-	x_j = \cos\!\left(\frac{j\pi}{n}\right),\quad j = 0,\dots,n
-	\]
-		
-	\centering
-	\includegraphics[width=0.5\textwidth]{chebPoints.png}
-	{\small Розташування вузлів Чебишева на $[-1,1]$}
-	
 
+	\begin{frame}{Базові методи просторового масштабування}
+		\begin{itemize}
+			\item \textbf{Інтерполяція за найближчим сусідом (Nearest Neighbor):} 
+			\begin{itemize}
+				\item \textit{Принцип:} Просте дублювання значення геометрично найближчого пікселя вихідного зображення.
+				\item \textit{Особливості:} Найвища швидкість $\mathcal{O}(1)$, але виражена ступінчастість контурів (\textit{aliasing}).
+			\end{itemize}
+			
+			\vspace{0.3cm}
+			\item \textbf{Білінійна інтерполяція (Bilinear):}
+			\begin{itemize}
+				\item \textit{Принцип:} Обчислення нового значення як зваженої суми чотирьох найближчих пікселів (окіл $2 \times 2$).
+				\item \textit{Особливості:} Згладжує зубчасті краї, але призводить до відчутного розмиття (\textit{blurring}) різких границь.
+			\end{itemize}
+			
+			\vspace{0.3cm}
+			\item \textbf{Бікубічна інтерполяція (Bicubic):}
+			\begin{itemize}
+				\item \textit{Принцип:} Побудова гладких кубічних поверхонь на основі 16 сусідніх пікселів (окіл $4 \times 4$).
+				\item \textit{Особливості:} Краще зберігає деталі, проте є ресурсомісткою і схильною до паразитних осциляцій (\textit{ringing artifacts}) на контрастних переходах.
+			\end{itemize}
+		\end{itemize}
+	\end{frame}
+
+\begin{frame}{Вузли Чебишева другого роду}
+	\begin{figure}[htbp]
+		\centering
+		\includegraphics[width=0.6\textwidth]{chebPoints}
+		\caption{Точки Чебишева}
+	\end{figure}
+	
+	\begin{equation}
+		x_j = \cos\left(\frac{j\pi}{n}\right), \qquad 0 \le j \le n.
+	\end{equation}
+	
 \end{frame}
-	% --- Слайд 3: Математична модель ---
-	\begin{frame}{Математична модель: Барицентрична інтерполяція}
+	
+	\begin{frame}{Порівняння рівномірної та чебишевської сіток}
+		\begin{columns}[t]
+			\begin{column}{0.48\textwidth}
+				\begin{figure}[htbp]
+					\centering
+					\includegraphics[width=0.7\linewidth]{uni}
+					\caption{Поліноміальна інтерполяція на рівномірній сітці вузлів}
+				\end{figure}
+			\end{column}
+			
+			\hfill
+			
+			\begin{column}{0.48\textwidth}
+				\begin{figure}[htbp]
+					\centering
+					\includegraphics[width=0.7\linewidth]{cheb}
+					\caption{Поліноміальна інтерполяція за вузлами Чебишева}
+				\end{figure}
+			\end{column}
+		\end{columns}
+	\end{frame}
+	
+		\begin{frame}{Математична модель: Барицентрична інтерполяція}
 		\small % Зменшуємо розмір шрифту, щоб усі формули помістилися
 		
 		\textbf{Вузли Чебишева:}
@@ -105,6 +137,89 @@
 			\sideset{}{'}\sum_{p=0}^{N} a_p = \frac{1}{2} a_0 + \sum_{p=1}^{N-1} a_p + \frac{1}{2} a_N
 		\end{equation*}
 	\end{frame}
+	
+\begin{frame}{Математична декомпозиція та оптимізація обчислень}
+	\begin{block}{Декомпозиція ядра}
+		Двовимірний барицентричний інтерполянт розкладається на два послідовні одновимірні проходи:
+		\begin{equation}
+			L_{n,m}(x, y) = \frac{\sideset{}{'}\sum\limits_{i=0}^{n} \dfrac{(-1)^{i}}{x - x_i}\, R_i(y)}{\sideset{}{'}\sum\limits_{i=0}^{n} \dfrac{(-1)^{i}}{x - x_i}}, \quad \text{де } 
+			R_i(y) = \frac{\sideset{}{'}\sum\limits_{j=0}^{m} \dfrac{(-1)^{j}}{y - y_j}\, f_{ij}}{\sideset{}{'}\sum\limits_{j=0}^{m} \dfrac{(-1)^{j}}{y - y_j}}
+		\end{equation}
+	\end{block}
+	
+	\vspace{0.5cm}
+	\textbf{Ключові інженерні рішення:}
+	\begin{itemize}
+		\item \textbf{Кешування ваг:} Одноразовий розрахунок матриць \texttt{W\_X} та \texttt{W\_Y} у паралельних потоках.
+		\item \textbf{Безблокова паралелізація обчислень:} Розпаралелювання двопрохідної інтерполяції.
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Матрична форма та двопрохідне обчислення}
+	\begin{block}{Фінальне матричне рівняння (Декомпозиція)}
+		\vspace{-0.1cm}
+		\begin{equation*}
+			\mathbf{G} = \mathbf{B}\, \mathbf{F}\, \mathbf{A}^{\top}
+		\end{equation*}
+	\end{block}
+	
+	\vspace{0.2cm}
+	\textbf{Двопрохідна схема обчислень:}
+	\begin{enumerate}
+		\item \textbf{Перший прохід} (інтерполяція вздовж $y$): 
+		\begin{equation*}
+			\mathbf{T} = \mathbf{B}\, \mathbf{F}, \quad \mathbf{T} \in \mathbb{R}^{H_2 \times W}
+		\end{equation*}
+		\item \textbf{Другий прохід} (інтерполяція вздовж $x$): 
+		\begin{equation*}
+			\mathbf{G} = \mathbf{T}\, \mathbf{A}^{\top}, \quad \mathbf{G} \in \mathbb{R}^{H_2 \times W_2}
+		\end{equation*}
+	\end{enumerate}
+	
+	\vspace{0.1cm}
+	\textbf{Переваги матричного представлення:}
+	\begin{itemize}
+		\item \textbf{Розділення задач:} Геометричні матриці ваг $\mathbf{A}$ та $\mathbf{B}$ розраховуються один раз і не залежать від колірних значень пікселів.
+		\item \textbf{Апаратна сумісність:} Алгоритм зводиться до множення матриць що відкриває шлях для використання оптимізованих бібліотек лінійної алгебри.
+	\end{itemize}
+\end{frame}
+	
+\begin{frame}{Програмна оптимізація матричного методу за допомогою OpenCV}
+	\begin{block}{Поканальне оптимізоване множення (\texttt{cv::gemm})}
+		\vspace{-0.1cm}
+		\begin{equation*}
+			\mathbf{G}_c = \mathbf{B} \cdot \mathbf{F}_c \cdot \mathbf{A}^{\top}, \quad c \in \{R, G, B\}
+		\end{equation*}
+	\end{block}
+	
+	\vspace{0.1cm}
+	\textbf{Чинники апаратного прискорення OpenCV:}
+	\begin{enumerate}
+		\item \textbf{Векторизація обчислень (SIMD):} Автоматичне використання інструкцій SSE, AVX/AVX2 для обробки кількох елементів за один такт процесора.
+		\item \textbf{Кеш-оптимізація:} Блокове множення (\textit{block matrix multiplication}) під розміри кешу L1/L2 для мінімізації звернень до RAM.
+		\item \textbf{Прихована багатопотоковість:} Автоматичне розпаралелювання операцій через вбудовані інструменти (Intel TBB, OpenMP або Apple GCD).
+	\end{enumerate}
+\end{frame}
+
+\begin{frame}{Локальна барицентрична інтерполяція}
+	\textbf{Проблема:} Глобальна інтерполяція може породжувати феномен Гіббса що проявляэться як осциляції на різких межах.
+	
+	\begin{block}{Рішення: Метод локальної інтерполяції}
+		Замість єдиного глобального полінома будується локальний інтерполянт низького степеня в околі $K \times K$ пікселів.
+	\end{block}
+	
+	\vspace{0.4cm}
+	\textbf{Властивості алгоритму:}
+	\begin{itemize}
+		\item \textbf{Швидкодія:} Обчислювальна складність є суворо лінійною — $\mathcal{O}(W_2 \cdot H_2)$.
+		\item \textbf{Керування артефактами (розмір вікна $K$):}
+		\begin{itemize}
+			\item $\mathbf{K = 3}$  — ідеально різкі краї, повне придушення осциляцій.
+			\item $\mathbf{K \ge 5}$ — вища точність на градієнтах, але з ризиком мікро-осциляцій.
+		\end{itemize}
+	\end{itemize}
+\end{frame}
+
 	
 	% --- Слайд 4: Інтерфейс ---
 \begin{frame}{Інтерфейс програми та процес роботи (1/2)}
