@@ -1,16 +1,18 @@
 \input{preamble}
 
 \begin{document}
-%	\input{title}
+	\input{title}
 
-%	\input{Task}
-%	\input{Abstract}
-	\tableofcontents	\newpage
-%	\input{introduction}
-%	\input{problemSetting}
+%	\input{Task} \newpage
+%	\input{Abstract} \newpage - сделать в конце
+%	\tableofcontents	\newpage
+	%\input{introduction} - дописать 
+%	\input{problemSetting} - сделать
 	\input{mainPart}
-%	\input{Conclusion}
+	%\input{Conclusion}
 % Щоб почати нумерацію зі сторінки ЗМІСТ, 
 % використовуй команду \setcounter{page}{X} перед змістом, де X - номер сторінки
 
+\bibliographystyle{plain}   % или unsrt, ieeetr, abbrv, alpha
+\bibliography{bibliography}
 \end{document}
