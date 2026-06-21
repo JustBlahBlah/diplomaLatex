@@ -38,7 +38,7 @@
 
 % Підрозділ 1.1 (З абзацу, напівжирний, без крапки в кінці)
 \titleformat{\subsection}[block]
-{\bfseries}
+{\normalfont\bfseries} % Напівжирний шрифт
 {\hspace{1.25cm}\thesubsection} % Відступ номера як абзац
 {1ex}
 {}
@@ -46,9 +46,9 @@
 % Відстань для підрозділів (1 рядок до і після)
 \titlespacing*{\subsection}{0pt}{\baselineskip}{\baselineskip}
 
-% Пункт 1.1.1 (Звичайний шрифт, з абзацу)
+% Пункт 1.1.1 (З абзацу, напівжирний)
 \titleformat{\subsubsection}[block]
-{\normalfont}
+{\normalfont\bfseries} % ТЕЖ НАПІВЖИРНИЙ ШРИФТ
 {\hspace{1.25cm}\thesubsubsection}
 {1ex}
 {}
@@ -61,6 +61,7 @@
 % Times New Roman для математичних формул
 \usepackage{newtxmath} 
 \newtheorem{statement}{Твердження}
+\newtheorem{definition}{Означення}
 \newtheorem{theorem}{Теорема}
 \theoremstyle{definition} 
 \newtheorem{remark}{Зауваження}
@@ -74,6 +75,9 @@
 \usepackage{caption}
 \captionsetup{aboveskip=12pt, belowskip=12pt}
 \setlength{\intextsep}{12pt} % Відстань від тексту до рисунка
+
+% ДОБАВИТЬ ЭТУ СТРОКУ:
+\numberwithin{figure}{section} % Нумерация рисунков внутри раздела (1.1, 1.2 и т.д.)
 
 % ================= НУМЕРАЦІЯ СТОРІНОК =================
 \usepackage{fancyhdr}
@@ -90,3 +94,7 @@
 \usepackage{csquotes} % Для правильних лапок (працює з babel)
 
 \sloppy % Дозволяє розтягувати пробіли, щоб текст не вилазив за поля
+
+\addto\captionsukrainian{%
+	\renewcommand{\refname}{Список бібліографічних посилань використаних джерел}%
+}

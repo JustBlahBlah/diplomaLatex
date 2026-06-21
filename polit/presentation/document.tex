@@ -15,7 +15,7 @@
 \title[Барицентрична інтерполяція]{Дослідження та програмна реалізація методу масштабування зображень з використанням барицентричної формули на основі вузлів інтерполяції Чебишева}
 \author{
 	Липянчик Євген \\
-	{\small Науковий керівник: к.~ф.-м.~н Хребет~В.~Г.} \\
+	{\small Науковий керівник: к.~ф.-м.~н доцент Хребет~В.~Г.} \\
 	{\small Науковий консультант: д-р~ф.м.~н Василик~В.~Б.}
 }
 \institute{Державний університет «Київський авіаційний інститут»}
@@ -34,7 +34,7 @@
 			\item Задачі масштабування зображень є критично важливими у сферах геоінформаційних систем (ГІС), обробки супутникових знімків, медичної візуалізації та комп'ютерного зору.
 			\item Від вибору алгоритму масштабування безпосередньо залежить баланс між обчислювальною складністю та якістю зображення.
 			\item Більшість класичних методів інтерполяції використовують рівномірні сітки та розглядають лише локальну інтерполяцію.
-			\item \textbf{Новизна підходу:} використання нестандартного моделювання із застосуванням нерівномірних сіток дискретизації, що складаються з точок екстремумів поліномів Чебишева другого роду.
+			\item \textbf{Новизна підходу:} використання нестандартного моделювання із застосуванням нерівномірних сіток дискретизації, що складаються з точок екстремумів поліномів Чебишева другого роду, та використання другої барицентричної формули формули поширеної на двовимірний випадок для задачі масштабування зображень.
 			\item Метод гнучко працює як у напрямку зменшення, так і збільшення зображень для великих коефіцієнтів.
 		\end{itemize}
 	\end{frame}
@@ -65,24 +65,47 @@
 			\item \textbf{Інтерполяція за найближчим сусідом (Nearest Neighbor):} 
 			\begin{itemize}
 				\item \textit{Принцип:} Просте дублювання значення геометрично найближчого пікселя вихідного зображення.
-				\item \textit{Особливості:} Найвища швидкість $\mathcal{O}(1)$, але виражена ступінчастість контурів (\textit{aliasing}).
+				\item \textit{Особливості:} Найвища швидкість $\mathcal{O}(1)$, але виражена східчастість контурів (\textit{aliasing}), блочність та ризик локального зміщення пропорцій.
 			\end{itemize}
 			
 			\vspace{0.3cm}
 			\item \textbf{Білінійна інтерполяція (Bilinear):}
 			\begin{itemize}
-				\item \textit{Принцип:} Обчислення нового значення як зваженої суми чотирьох найближчих пікселів (окіл $2 \times 2$).
-				\item \textit{Особливості:} Згладжує зубчасті краї, але призводить до відчутного розмиття (\textit{blurring}) різких границь.
+				\item \textit{Принцип:} Обчислення нового значення шляхом послідовної лінійної інтерполяції вздовж двох осей на основі чотирьох найближчих пікселів (окіл $2 \times 2$).
+				\item \textit{Особливості:} Згладжує зубчасті краї, але призводить до сильного розмиття (\textit{blurring}), втрати мікроконтрасту та високочастотних деталей.
 			\end{itemize}
 			
 			\vspace{0.3cm}
 			\item \textbf{Бікубічна інтерполяція (Bicubic):}
 			\begin{itemize}
 				\item \textit{Принцип:} Побудова гладких кубічних поверхонь на основі 16 сусідніх пікселів (окіл $4 \times 4$).
-				\item \textit{Особливості:} Краще зберігає деталі, проте є ресурсомісткою і схильною до паразитних осциляцій (\textit{ringing artifacts}) на контрастних переходах.
+				\item \textit{Особливості:} Краще зберігає деталі, проте є ресурсомісткою і схильною до ефекту дзвону (\textit{ringing}), перерегулювання (\textit{overshoot}) та виходу значень за межі діапазону кольорів.
 			\end{itemize}
 		\end{itemize}
 	\end{frame}
+
+	
+\begin{frame}{Порівняння рівномірної та чебишевської сіток}
+	\begin{columns}[t]
+		\begin{column}{0.48\textwidth}
+			\begin{figure}[htbp]
+				\centering
+				\includegraphics[width=0.7\linewidth]{uni}
+				\caption{Поліноміальна інтерполяція на рівномірній сітці вузлів}
+			\end{figure}
+		\end{column}
+		
+		\hfill
+		
+		\begin{column}{0.48\textwidth}
+			\begin{figure}[htbp]
+				\centering
+				\includegraphics[width=0.7\linewidth]{cheb}
+				\caption{Поліноміальна інтерполяція за вузлами Чебишева}
+			\end{figure}
+		\end{column}
+	\end{columns}
+\end{frame}
 
 \begin{frame}{Вузли Чебишева другого роду}
 	\begin{figure}[htbp]
@@ -97,46 +120,36 @@
 	
 \end{frame}
 	
-	\begin{frame}{Порівняння рівномірної та чебишевської сіток}
-		\begin{columns}[t]
-			\begin{column}{0.48\textwidth}
-				\begin{figure}[htbp]
-					\centering
-					\includegraphics[width=0.7\linewidth]{uni}
-					\caption{Поліноміальна інтерполяція на рівномірній сітці вузлів}
-				\end{figure}
-			\end{column}
-			
-			\hfill
-			
-			\begin{column}{0.48\textwidth}
-				\begin{figure}[htbp]
-					\centering
-					\includegraphics[width=0.7\linewidth]{cheb}
-					\caption{Поліноміальна інтерполяція за вузлами Чебишева}
-				\end{figure}
-			\end{column}
-		\end{columns}
-	\end{frame}
+\begin{frame}{Математична модель: Барицентрична інтерполяція}
+	\scriptsize
 	
-		\begin{frame}{Математична модель: Барицентрична інтерполяція}
-		\small % Зменшуємо розмір шрифту, щоб усі формули помістилися
-		
-		\textbf{Вузли Чебишева:}
-		\begin{equation*}
-			\omega_x = \left\{x_i = -\cos \frac{\pi i}{n}, i = \overline{0,n}\right\}, \quad \omega_y = \left\{y_j = -\cos \frac{\pi j}{m}, j = \overline{0,m}\right\}
-		\end{equation*}
-		
-		\textbf{Барицентрична формула:}
-		\begin{equation*}
-			L_{n,m}(x_r, y_r) = \frac{\sideset{}{'}\sum_{i=0}^{n} \sideset{}{'}\sum_{j=0}^{m} \frac{(-1)^{i+j}}{(x_r-x_i)(y_r-y_j)} f_{ij}}{\sideset{}{'}\sum_{i=0}^{n} \sideset{}{'}\sum_{j=0}^{m} \frac{(-1)^{i+j}}{(x_r-x_i)(y_r-y_j)}}
-		\end{equation*}
-		
-		\textbf{Символ $\sum'$ означає:}
-		\begin{equation*}
-			\sideset{}{'}\sum_{p=0}^{N} a_p = \frac{1}{2} a_0 + \sum_{p=1}^{N-1} a_p + \frac{1}{2} a_N
-		\end{equation*}
-	\end{frame}
+	\textbf{Вузли Чебишева:}
+	\begin{equation*}
+		\omega_x = \left\{x_i = -\cos \frac{\pi i}{n}, i = \overline{0,n}\right\}, \quad \omega_y = \left\{y_j = -\cos \frac{\pi j}{m}, j = \overline{0,m}\right\}
+	\end{equation*}
+	
+	\vspace{-0.2cm} % Легке ущільнення
+	\textbf{Інтерполяційний багаточлен Лагранжа:}
+	\begin{equation*}
+		L_{n, m}(x, y) = \sum_{i=0}^{n} \sum_{j=0}^{m} \frac{\omega_n(x) \omega_m(y) f_{i, j}}{(x-x_i) \omega'_n(x_i) \cdot (y-y_j) \omega'_m(y_j)}
+	\end{equation*}
+	
+	\vspace{-0.3cm} % Підтягуємо пояснення ближче до формули
+	де $\omega_n(x)$ та $\omega_m(y)$:
+	\begin{equation*}
+		\omega_n(x) = \prod_{k=0}^{n}(x-x_k), \quad \omega_m(y) = \prod_{l=0}^{m}(y-y_l)
+	\end{equation*}
+	
+	\vspace{-0.2cm}
+	\textbf{Барицентрична формула:}
+	\begin{equation*}
+		L_{n,m}(x, y) = \frac{\sideset{}{'}\sum\limits_{i=0}^{n} \sideset{}{'}\sum\limits_{j=0}^{m} \frac{(-1)^{i+j}}{(x-x_i)(y-y_j)} f_{ij}}{\sideset{}{'}\sum\limits_{i=0}^{n} \sideset{}{'}\sum\limits_{j=0}^{m} \frac{(-1)^{i+j}}{(x-x_i)(y-y_j)}}
+	\end{equation*}
+	
+	\vspace{-0.1cm}
+	% Робимо пояснення символу в один рядок
+	\textbf{Символ $\sum'$ означає:} $\sideset{}{'}\sum\limits_{p=0}^{N} a_p = \frac{1}{2} a_0 + \sum\limits_{p=1}^{N-1} a_p + \frac{1}{2} a_N$
+\end{frame}
 	
 \begin{frame}{Математична декомпозиція та оптимізація обчислень}
 	\begin{block}{Декомпозиція ядра}
@@ -287,33 +300,46 @@
 	\end{columns}
 \end{frame}
 
-\begin{frame}{Метрики оцінки якості масштабування}
-	\textbf{MSE:}
+\begin{frame}{Метрики оцінки якості масштабування зображень}
+	\scriptsize
+	
+	\textbf{Середньоквадратична похибка (MSE):}
 	\begin{equation*}
-		MSE = ...
+		\text{MSE}(I^{res}, I^{out}) = 
+		\begin{cases} 
+			\frac{1}{MN} \|I^{res} - I^{out}\|_F^2, & \text{напівтонові}, \\[8pt]
+			\frac{1}{3NM} \Big\{ \|I_R^{res} - I_R^{out}\|_F^2 + \|I_G^{res} - I_G^{out}\|_F^2 + \|I_B^{res} - I_B^{out}\|_F^2 \Big\}, & \text{RGB}, 
+		\end{cases}
+	\end{equation*}
+	\vspace{-0.1cm}
+	де $\|\cdot\|_F$ — норма Фробеніуса.
+	
+	\vspace{0.2cm}
+	\textbf{Пікове відношення сигнал/шум (PSNR):}
+	\begin{equation*}
+		\text{PSNR}(I^{res}, I^{out}) = 20 \log_{10} \left( \frac{255}{\sqrt{\text{MSE}(I^{res}, I^{out})}} \right)
 	\end{equation*}
 	
-	\textbf{PNSR:}
+	\vspace{0.2cm}
+	\textbf{Індекс структурної подібності (SSIM):}
 	\begin{equation*}
-		PSNR = ...
+		\text{SSIM}(I^{res}, I^{out}) = \frac{[2\mu(I^{res})\mu(I^{out}) + c_1][2\text{cov}(I^{res}, I^{out}) + c_2]}{[\mu^2(I^{res}) + \mu^2(I^{out}) + c_1][\sigma^2(I^{res}) + \sigma^2(I^{out}) + c_2]}
 	\end{equation*}
 	
-	\textbf{SSIM:}
-	\begin{equation*}
-		SSIM = ...
-	\end{equation*}
+	\vspace{-0.1cm}
+	\textit{*Для RGB-зображень метрика SSIM обчислюється виключно для каналу яскравості (Y) у колірному просторі YCbCr.}
 \end{frame}
 
-\begin{frame}{Результати}
+\begin{frame}{Таблиця результатів тестування збільшення}
 	
-		\begin{figure}
-	\begin{center}
-		\includegraphics[width=0.55\linewidth]{PexelsLCIvsBIC.png} \\
-	\caption{Результати тестування на датасеті PEXELS300 для випадку зменшення}
-\end{center}
-	\end{figure}
-	
+		Тут буде таблиця
 \end{frame}
+
+\begin{frame}{Таблиця результатів тестування зменшення}
+	
+	Тут буде таблиця
+\end{frame}
+
 	% --- Слайд 6: Висновки ---
 \begin{itemize}
 	\item \textbf{Проведено аналіз} існуючих класичних методів масштабування зображень, визначено їхні математичні особливості та характерні візуальні артефакти.
@@ -327,4 +353,10 @@
 	\item \textbf{Здійснено комплексне тестування} та порівняльний аналіз на стандартних датасетах, за метриками PSNR та SSIM.
 \end{itemize}
 	
+	У результаті виконання кваліфікаційної роботи було розроблено конкурентноздібний алгоритм. Подальшим розвиком цієї роботи буде подальша оптимиізація алгоритму по часу виконання та покразення якості за допомогою фільтрів, в частності Де ла Вале Пусена 
+\begin{frame}
+	\centering
+	\Huge \textbf{Дякую за увагу!}
+\end{frame}
 \end{document}
+

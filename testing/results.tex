@@ -1,0 +1,127 @@
+% !TeX root = document.tex
+\subsection{Результати тестування}
+
+Для комплексної перевірки результативності запропонованого математичного апарату та розробленого програмного забезпечення було проведено серію автоматизованих тестів на трьох наборах зображень: \textbf{PEXELS500}, \textbf{BSD500} та \textbf{URBAN100}. Вибір саме цих наборів даних зумовлений їхньою високою репрезентативністю: вони містять широкий спектр візуальних сцен, включаючи складні урбаністичні структури, дрібні природні текстури та високочастотні деталі. Це дозволяє максимально об'єктивно оцінити якість збереження контурів та стійкість алгоритмів до появи артефактів під час зміни роздільної здатності.
+
+Експериментальне дослідження було поділено на два основні етапи.
+
+\paragraph{Етап 1: Загальне порівняння методів масштабування.}
+На першому етапі проводилося порівняння розроблених реалізацій барицентричного методу зі стандартними індустріальними алгоритмами. Тестування виконувалося для обох напрямків трансформації: зменшення розміру та його збільшення. 
+
+У процесі тестування програмний модуль автоматично обробляв кожне зображення з обраних датасетів, обчислюючи середні показники витраченого часу та метрик оцінки якості MSE, PSNR та SSIM. Зведені результати для режимів зменшення та збільшення зображень наведено на рисунках~\ref{fig:results_downscale}-\ref{set14DownScaling} та~\ref{fig:results_upscale}-\ref{set14UpScaling} відповідно.
+
+\paragraph{Етап 2: Аналіз ефективності локального методу.}
+Другий етап тестування був ізольовано присвячений дослідженню запропонованого локального барицентричного методу. Головною метою цього етапу було встановлення практичної залежності між розміром локального вікна інтерполяції який задається параметром $K$ та підсумковими показниками візуальної якості.
+
+Для цього на тих самих наборах даних було ініційовано серію тестів виключно для локального методу із заданням різних значень параметра $K$. Такий підхід дозволив проаналізувати динаміку зміни метрик PSNR та SSIM при зміні розміру локального вікна. Отримані результати, що демонструють баланс між швидкістю виконання та точністю наближення для різних розмірів локального вікна, наведені на рисунку~\ref{fig:results_local_k} для випадку зменшення зображень, і на для випадку збільшення зображень.
+
+\begin{figure}[htbp]
+	\centering
+    \includegraphics[width=1\textwidth]{figures/pics/PEXELS300DownScaling} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Downscaling для набору даних PEXELS300}
+	\label{fig:results_downscale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/BSD500DownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Downscaling для набору даних BSD500}
+	\label{fig:BSD500DownScaling}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/URBAN100DownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Downscaling для набору даних URBAN100}
+	\label{fig:URBAN100DownScaling}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/set14DownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Downscaling для набору даних set14}
+	\label{fig:set14DownScaling}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/PEXELS300UpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Upscaling для набору даних PEXELS300}
+	\label{fig:results_upscale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/BSD500UpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Upscaling для набору даних BSD500}
+	\label{fig:BSD500UpScaling}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/URBAN100UpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Upscaling для набору даних URBAN100}
+	\label{fig:URBAN100UpScaling}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=1\textwidth]{figures/pics/set14UpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування алгоритмів масштабування у режимі Upscaling для набору даних set14}
+	\label{fig:set14UpScaling}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/pics/PEXELS300LocalDownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Downscaling для набору даних PEXELS300}
+	\label{fig:PEXELS300LocalDownScale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/pics/BSD500LocalDownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Downscaling для набору даних BSD500}
+	\label{fig:BSD500LocalDownScale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.85\textwidth]{figures/pics/URBAN100LocalDownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Downscaling для набору даних URBAN100}
+	\label{fig:URBAN100LocalDownScale}
+\end{figure}
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{figures/pics/set14LocalDownScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Downscaling для набору даних set14}
+	\label{fig:set14LocalDownScale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/pics/PEXELS300LocalUpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Upscaling для набору даних PEXELS300}
+	\label{fig:PEXELS300LocalUpScale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.8\textwidth]{figures/pics/BSD500LocalUpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Upscaling для набору даних BSD500}
+	\label{fig:BSD500LocalUpScale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.85\textwidth]{figures/pics/URBAN100LocalUpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Upscaling для набору даних URBAN100}
+	\label{fig:URBAN100LocalUpScale}
+\end{figure}
+
+\begin{figure}[htbp]
+	\centering
+	\includegraphics[width=0.9\textwidth]{figures/pics/set14LocalUpScale} % Замініть на свій шлях до фото
+	\caption{Результати тестування локального барицентричного методу при різних значеннях параметра $K$ у режимі Upscaling для набору даних set14}
+	\label{fig:set14LocalUpScale}
+\end{figure}
